@@ -244,40 +244,36 @@ class IEEEAuthorScraperApp:
             list: List of publication dictionaries
         """
         all_publications = []
-        search_terms = self.config.get('search_queries', {})
+        search_queries = self.config.get('search_queries', [])
         
-        total_categories = len(search_terms)
-        category_num = 0
+        total_queries = len(search_queries)
         
-        for category, queries in search_terms.items():
-            category_num += 1
-            logger.info(f"\n[{category_num}/{total_categories}] Searching category: {category}")
-            
-            for query in queries:
-                try:
-                    self.stats['queries_executed'] += 1
-                    logger.info(f"  Query: {query}")
-                    
-                    publications = self.ieee_scraper.search_publications(
-                        query, 
-                        collect_all_pages=collect_all_pages
-                    )
-                    
-                    # Add category and query metadata
-                    for pub in publications:
-                        pub['category'] = category
-                        pub['query'] = query
-                    
-                    all_publications.extend(publications)
-                    
-                    logger.info(f"    Collected {len(publications)} publications")
-                    
-                    # Delay between queries to be respectful
-                    time.sleep(self.config.get('delay_between_requests', 2))
-                    
-                except Exception as e:
-                    logger.error(f"Error searching for '{query}': {e}")
-                    continue
+        logger.info(f"Starting search with {total_queries} queries...")
+        
+        for idx, query in enumerate(search_queries, 1):
+            try:
+                self.stats['queries_executed'] += 1
+                logger.info(f"\n[{idx}/{total_queries}] Query: {query}")
+                
+                publications = self.ieee_scraper.search_publications(
+                    query, 
+                    collect_all_pages=collect_all_pages
+                )
+                
+                # Add query metadata
+                for pub in publications:
+                    pub['query'] = query
+                
+                all_publications.extend(publications)
+                
+                logger.info(f"  Collected {len(publications)} publications")
+                
+                # Delay between queries to be respectful
+                time.sleep(self.config.get('delay_between_requests', 2))
+                
+            except Exception as e:
+                logger.error(f"Error searching for '{query}': {e}")
+                continue
         
         # Remove duplicates based on URL
         unique_pubs = {}

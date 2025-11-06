@@ -1,13 +1,9 @@
 {
-  "search_queries": {
-    "power_electronics": [
-      "multilevel inverter",
-      "IGBT power electronics"
-    ],
-    "renewable_energy": [
-      "solar energy photovoltaics"
-    ]
-  },
+  "search_queries": [
+    "multilevel inverter",
+    "IGBT power electronics",
+    "solar energy photovoltaics"
+  ],
   "delay_between_requests": 3,
   "max_results_per_query": 20,
   "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
