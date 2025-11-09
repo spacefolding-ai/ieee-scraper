@@ -50,3 +50,4 @@ geckodriver
 # Plan files
 *.plan.md
 
+.env
