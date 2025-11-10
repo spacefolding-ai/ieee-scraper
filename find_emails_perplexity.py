@@ -11,9 +11,12 @@ import aiohttp
 import re
 import time
 import logging
+import signal
+import sys
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, Optional
+from collections import deque
 
 # Setup logging
 logging.basicConfig(
@@ -26,16 +29,90 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Global flag for graceful shutdown
+shutdown_requested = False
+shutdown_data = {
+    'results': None,
+    'output_path': None,
+    'finder': None,
+    'total': 0,
+    'processed': 0
+}
+
+
+def signal_handler(signum, frame):
+    """Handle Ctrl+C and other termination signals gracefully"""
+    global shutdown_requested
+    
+    if shutdown_requested:
+        # Second Ctrl+C - force exit
+        logger.warning("\n⚠️  Force exit - progress may not be saved!")
+        sys.exit(1)
+    
+    shutdown_requested = True
+    logger.info("\n\n🛑 Shutdown requested (Ctrl+C detected)")
+    logger.info("⏳ Saving progress... (press Ctrl+C again to force quit)")
+    
+    # Save current progress if data available
+    if shutdown_data['results'] and shutdown_data['output_path']:
+        try:
+            save_results(
+                shutdown_data['results'],
+                shutdown_data['output_path'],
+                shutdown_data['finder'],
+                shutdown_data['total'],
+                shutdown_data['processed']
+            )
+            logger.info(f"✅ Progress saved: {shutdown_data['processed']}/{shutdown_data['total']} authors")
+            logger.info(f"📝 Resume with: python3 find_emails_perplexity.py --resume")
+        except Exception as e:
+            logger.error(f"❌ Error saving progress: {e}")
+    
+    sys.exit(0)
+
+
+class RateLimiter:
+    """Rate limiter to ensure we don't exceed max requests per minute"""
+    
+    def __init__(self, max_rpm: int = 50):
+        self.max_rpm = max_rpm
+        self.request_times = deque()
+        self.lock = asyncio.Lock()
+    
+    async def acquire(self):
+        """Wait if necessary to stay under rate limit"""
+        async with self.lock:
+            now = time.time()
+            
+            # Remove timestamps older than 60 seconds
+            while self.request_times and now - self.request_times[0] > 60:
+                self.request_times.popleft()
+            
+            # If we're at the limit, wait until we can make another request
+            if len(self.request_times) >= self.max_rpm:
+                sleep_time = 60 - (now - self.request_times[0]) + 0.1  # Add small buffer
+                if sleep_time > 0:
+                    logger.debug(f"Rate limit: sleeping {sleep_time:.1f}s")
+                    await asyncio.sleep(sleep_time)
+                    # Clean up old timestamps after sleep
+                    now = time.time()
+                    while self.request_times and now - self.request_times[0] > 60:
+                        self.request_times.popleft()
+            
+            # Record this request
+            self.request_times.append(time.time())
+
 
 class PerplexityEmailFinder:
     """Find author emails using Perplexity API"""
     
-    def __init__(self, api_key: str):
+    def __init__(self, api_key: str, max_rpm: int = None):
         self.api_key = api_key
         self.base_url = "https://api.perplexity.ai/chat/completions"
         self.emails_found = 0
         self.emails_not_found = 0
         self.api_errors = 0
+        self.rate_limiter = RateLimiter(max_rpm) if max_rpm else None
         
     def extract_email(self, text: str) -> Optional[str]:
         """Extract email address from text"""
@@ -168,6 +245,11 @@ Include the source URL where the email was found."""
         Returns:
             dict with 'found', 'email', 'source', 'response' keys
         """
+        
+        # Apply rate limiting if configured
+        if self.rate_limiter:
+            await self.rate_limiter.acquire()
+        
         prompt = f"""Find the institutional email address for this researcher:
 
 Name: {author_name}
@@ -277,6 +359,7 @@ async def process_authors_parallel(finder: PerplexityEmailFinder,
                 
                 if not affiliations:
                     return author_id, {
+                        'author_id': author_id,
                         'name': name,
                         'affiliation': None,
                         'email_search': {'found': False, 'reason': 'no affiliation'}
@@ -288,6 +371,7 @@ async def process_authors_parallel(finder: PerplexityEmailFinder,
                 email_result = await finder.search_email_async(session, name, affiliation)
                 
                 return author_id, {
+                    'author_id': author_id,
                     'name': name,
                     'affiliation': affiliation,
                     'all_affiliations': affiliations,
@@ -340,10 +424,22 @@ def process_authors_sync(finder: PerplexityEmailFinder,
     Returns:
         Dictionary with results
     """
+    global shutdown_requested, shutdown_data
+    
     results = {}
     total = len(authors_dict)
     
+    # Update shutdown data
+    shutdown_data['results'] = results
+    shutdown_data['output_path'] = output_file
+    shutdown_data['finder'] = finder
+    shutdown_data['total'] = total
+    
     for idx, (author_id, author_info) in enumerate(authors_dict.items(), 1):
+        # Check for shutdown request
+        if shutdown_requested:
+            logger.info(f"\n⏹️  Stopping at author {idx}/{total}")
+            break
         name = author_info.get('primary_preferred_name', 'Unknown')
         affiliations = author_info.get('current_affiliations', [])
         
@@ -352,6 +448,7 @@ def process_authors_sync(finder: PerplexityEmailFinder,
         if not affiliations:
             logger.warning("  No affiliation available")
             results[author_id] = {
+                'author_id': author_id,
                 'name': name,
                 'affiliation': None,
                 'email_search': {'found': False, 'reason': 'no affiliation'}
@@ -370,11 +467,15 @@ def process_authors_sync(finder: PerplexityEmailFinder,
             logger.warning(f"  ✗ Not found")
         
         results[author_id] = {
+            'author_id': author_id,
             'name': name,
             'affiliation': affiliation,
             'all_affiliations': affiliations,
             'email_search': email_result
         }
+        
+        # Update progress for shutdown handler
+        shutdown_data['processed'] = idx
         
         # Save progress every 25 authors
         if idx % 25 == 0:
@@ -411,6 +512,10 @@ def main():
     import argparse
     import os
     
+    # Register signal handlers for graceful shutdown
+    signal.signal(signal.SIGINT, signal_handler)  # Ctrl+C
+    signal.signal(signal.SIGTERM, signal_handler)  # kill command
+    
     # Try to load from .env file
     try:
         from dotenv import load_dotenv
@@ -430,6 +535,8 @@ def main():
                        help='Use parallel processing (faster)')
     parser.add_argument('--concurrent', type=int, default=5,
                        help='Number of concurrent requests (default: 5)')
+    parser.add_argument('--max-rpm', type=int, default=None,
+                       help='Maximum requests per minute (e.g., 45-50 for Perplexity)')
     parser.add_argument('--test', action='store_true',
                        help='Test mode - only process 10 authors')
     parser.add_argument('--limit', type=int, default=None,
@@ -489,7 +596,10 @@ def main():
         return
     
     # Initialize finder
-    finder = PerplexityEmailFinder(api_key)
+    finder = PerplexityEmailFinder(api_key, max_rpm=args.max_rpm)
+    
+    if args.max_rpm:
+        logger.info(f"Rate limiting enabled: {args.max_rpm} requests per minute")
     
     # Estimate
     if args.parallel:
@@ -501,6 +611,7 @@ def main():
     
     logger.info(f"Processing {total} authors")
     logger.info(f"Estimated time: {est_time:.1f} minutes ({est_time/60:.1f} hours)")
+    logger.info(f"💡 Press Ctrl+C to stop gracefully and save progress")
     
     start_time = time.time()
     
