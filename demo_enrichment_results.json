@@ -1,0 +1,88 @@
+[
+  {
+    "author_id": "37086992780",
+    "name": "Tuân-Tú Huỳnh",
+    "url_checked": "https://lhu.edu.vn/327/43919/LHU-lecturer-participated-in-2023-FAIR-Conference.html",
+    "found_text": "LHU lecturer participated in 2023 FAIR Conference",
+    "author_type": "Lecturer (teaching)",
+    "status": "SUCCESS",
+    "confidence": "HIGH"
+  },
+  {
+    "author_id": "37329901100",
+    "name": "Gerald Franzl",
+    "url_checked": "https://www.donau-uni.ac.at/en/university/organization/employees/person/4295320016",
+    "found_text": "Principle investigator for the project",
+    "author_type": "Principal investigator",
+    "status": "SUCCESS",
+    "confidence": "HIGH"
+  },
+  {
+    "author_id": "411539027394924",
+    "name": "Magdalena Wolf",
+    "url_checked": "https://boku.ac.at/en/personen/person/3227BE585865DF60",
+    "found_text": "Senior Lecturer - Institute of Chemical and Energy Engineering",
+    "author_type": "Senior Lecturer",
+    "status": "SUCCESS",
+    "confidence": "HIGH"
+  },
+  {
+    "author_id": "37089512046",
+    "name": "Rohit Dhakate",
+    "url_checked": "https://www.aau.at/en/team/dhakate-rohit-sudhakar/",
+    "found_text": "M.Sc. - Department of Smart System Technologies",
+    "author_type": null,
+    "status": "UNCLEAR",
+    "confidence": "LOW",
+    "notes": "Only shows degree, likely PhD student or early career researcher"
+  },
+  {
+    "author_id": "37085667715",
+    "name": "Stefan Wilker",
+    "url_checked": "https://www.tuwien.at/etit/ict/sis/energyit-group/kontakt",
+    "found_text": "Projektass. Dipl.-Ing. (Project Assistant)",
+    "author_type": "Researcher",
+    "status": "SUCCESS",
+    "confidence": "MEDIUM"
+  },
+  {
+    "author_id": "38527071400",
+    "name": "Mahin K. Atiq",
+    "url_checked": "https://scholar.google.co.in/citations?user=WS_8naIAAAAJ&hl=vi",
+    "found_text": "Wrong person in Google Scholar",
+    "author_type": null,
+    "status": "FAILED",
+    "confidence": "NONE",
+    "notes": "Google Scholar link incorrect"
+  },
+  {
+    "author_id": "37086484502",
+    "name": "David Reihs",
+    "url_checked": "https://publications.ait.ac.at/en/persons/david.reihs",
+    "found_text": "researcher at AIT Austrian Institute of Technology",
+    "author_type": "Researcher",
+    "status": "SUCCESS",
+    "confidence": "MEDIUM"
+  },
+  {
+    "author_id": "37407984900",
+    "name": "Philipp Svoboda",
+    "url_checked": "https://www.tuwien.at/ace/events/detail/news/...",
+    "found_text": "Dr. Philipp Svoboda - CD Laboratory presentation",
+    "author_type": null,
+    "status": "UNCLEAR",
+    "confidence": "LOW",
+    "notes": "Likely senior researcher or lab leader, but no explicit title"
+  },
+  {
+    "author_id": "37646705500",
+    "name": "Roman Popp",
+    "url_checked": "http://ontoucp.ict.tuwien.ac.at/cms/contact.html",
+    "found_text": "Project member at Institute of Computer Technology",
+    "author_type": null,
+    "status": "UNCLEAR",
+    "confidence": "LOW",
+    "notes": "No specific title given"
+  }
+]
+
