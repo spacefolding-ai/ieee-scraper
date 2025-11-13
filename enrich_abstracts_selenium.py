@@ -58,10 +58,24 @@ class SeleniumAbstractEnricher:
         chrome_options.add_argument('--disable-blink-features=AutomationControlled')
         
         # Initialize driver
-        driver_path = ChromeDriverManager().install()
-        if 'THIRD_PARTY_NOTICES' in driver_path:
-            driver_dir = os.path.dirname(driver_path)
-            driver_path = os.path.join(driver_dir, 'chromedriver')
+        # Try to use older approved ChromeDriver version first
+        old_driver_path = os.path.expanduser('~/.wdm/drivers/chromedriver/mac64/142.0.7444.59/chromedriver-mac-arm64/chromedriver')
+        
+        if os.path.exists(old_driver_path) and os.access(old_driver_path, os.X_OK):
+            driver_path = old_driver_path
+            logger.info(f"Using previously approved ChromeDriver: {driver_path}")
+        else:
+            driver_path = ChromeDriverManager().install()
+            if 'THIRD_PARTY_NOTICES' in driver_path:
+                driver_dir = os.path.dirname(driver_path)
+                driver_path = os.path.join(driver_dir, 'chromedriver')
+            
+            # Ensure the driver path is correct and executable
+            if not os.path.exists(driver_path):
+                raise FileNotFoundError(f"ChromeDriver not found at: {driver_path}")
+            if not os.access(driver_path, os.X_OK):
+                os.chmod(driver_path, 0o755)
+                logger.info(f"Made ChromeDriver executable: {driver_path}")
         
         service = Service(driver_path)
         self.driver = webdriver.Chrome(service=service, options=chrome_options)
@@ -167,17 +181,26 @@ def save_enriched_data(data, output_file):
 
 def collect_all_publications(data):
     """Collect all unique publications with their article numbers"""
-    publications_map = {}  # article_number -> list of (author_id, pub_index)
+    publications_map = {}  # article_number -> list of (author_id, pub_index, pub_type)
     
     for author_id, author_info in data['authors'].items():
+        # Collect first-author publications
         pubs = author_info.get('publications_as_first_author', [])
-        
         for pub_idx, pub in enumerate(pubs):
             article_number = pub.get('article_number')
             if article_number:
                 if article_number not in publications_map:
                     publications_map[article_number] = []
-                publications_map[article_number].append((author_id, pub_idx))
+                publications_map[article_number].append((author_id, pub_idx, 'first'))
+        
+        # Collect non-first-author publications
+        pubs = author_info.get('publications_as_non_first_author', [])
+        for pub_idx, pub in enumerate(pubs):
+            article_number = pub.get('article_number')
+            if article_number:
+                if article_number not in publications_map:
+                    publications_map[article_number] = []
+                publications_map[article_number].append((author_id, pub_idx, 'non_first'))
     
     return publications_map
 
@@ -221,8 +244,9 @@ def main():
     
     for article_number, locations in publications_map.items():
         # Check if first occurrence already has full abstract
-        author_id, pub_idx = locations[0]
-        pub = data['authors'][author_id]['publications_as_first_author'][pub_idx]
+        author_id, pub_idx, pub_type = locations[0]
+        pub_list = 'publications_as_first_author' if pub_type == 'first' else 'publications_as_non_first_author'
+        pub = data['authors'][author_id][pub_list][pub_idx]
         abstract = pub.get('abstract', '')
         
         # Skip if already has full abstract (doesn't end with ...)
@@ -261,9 +285,10 @@ def main():
         
         for idx, (article_number, locations) in enumerate(pubs_to_enrich.items(), 1):
             # Get title from first occurrence for logging
-            author_id, pub_idx = locations[0]
-            pub = data['authors'][author_id]['publications_as_first_author'][pub_idx]
-            title = pub.get('article_title', 'N/A')[:80]
+            author_id, pub_idx, pub_type = locations[0]
+            pub_list = 'publications_as_first_author' if pub_type == 'first' else 'publications_as_non_first_author'
+            pub = data['authors'][author_id][pub_list][pub_idx]
+            title = pub.get('title', pub.get('article_title', 'N/A'))[:80]
             
             logger.info(f"[{idx}/{total}] Fetching abstract for article {article_number}...")
             logger.info(f"  Title: {title}")
@@ -274,25 +299,29 @@ def main():
                 
                 if full_abstract:
                     # Update all occurrences of this publication
-                    for author_id, pub_idx in locations:
-                        data['authors'][author_id]['publications_as_first_author'][pub_idx]['abstract'] = full_abstract
-                        data['authors'][author_id]['publications_as_first_author'][pub_idx]['abstract_enriched'] = True
-                        data['authors'][author_id]['publications_as_first_author'][pub_idx]['abstract_enriched_at'] = datetime.now().isoformat()
+                    for author_id, pub_idx, pub_type in locations:
+                        pub_list = 'publications_as_first_author' if pub_type == 'first' else 'publications_as_non_first_author'
+                        data['authors'][author_id][pub_list][pub_idx]['abstract'] = full_abstract
+                        data['authors'][author_id][pub_list][pub_idx]['abstract_enriched'] = True
+                        data['authors'][author_id][pub_list][pub_idx]['abstract_enriched_at'] = datetime.now().isoformat()
+                        data['authors'][author_id][pub_list][pub_idx]['is_full_abstract'] = True
                     
                     enriched_count += 1
                     logger.info(f"  ✓ Success - {len(full_abstract)} chars")
                 else:
                     # Mark as attempted but failed
-                    for author_id, pub_idx in locations:
-                        data['authors'][author_id]['publications_as_first_author'][pub_idx]['abstract_fetch_error'] = 'Could not extract from page'
+                    for author_id, pub_idx, pub_type in locations:
+                        pub_list = 'publications_as_first_author' if pub_type == 'first' else 'publications_as_non_first_author'
+                        data['authors'][author_id][pub_list][pub_idx]['abstract_fetch_error'] = 'Could not extract from page'
                     
                     failed_count += 1
                     logger.warning(f"  ✗ Failed to fetch abstract")
                 
             except Exception as e:
                 logger.error(f"  ✗ Error: {e}")
-                for author_id, pub_idx in locations:
-                    data['authors'][author_id]['publications_as_first_author'][pub_idx]['abstract_fetch_error'] = str(e)
+                for author_id, pub_idx, pub_type in locations:
+                    pub_list = 'publications_as_first_author' if pub_type == 'first' else 'publications_as_non_first_author'
+                    data['authors'][author_id][pub_list][pub_idx]['abstract_fetch_error'] = str(e)
                 failed_count += 1
             
             # Save progress periodically
@@ -311,6 +340,8 @@ def main():
             time.sleep(2.0)
         
         # Update summary
+        if 'summary' not in data:
+            data['summary'] = {}
         data['summary']['abstracts_enriched'] = True
         data['summary']['abstract_enrichment_date'] = datetime.now().isoformat()
         data['summary']['publications_with_full_abstracts'] = enriched_count
