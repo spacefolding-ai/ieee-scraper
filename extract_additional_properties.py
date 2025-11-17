@@ -67,7 +67,6 @@ DOMAIN_KEYWORDS = {
     'electric_vehicles': ['electric vehicle', 'EV', 'charging station', 'EV charger', 'battery management'],
     'power_electronics': ['power electronic', 'converter', 'inverter', 'rectifier', 'DC-DC', 'AC-DC'],
     'energy_storage': ['energy storage', 'battery', 'ESS', 'storage system'],
-    'machine_learning': ['machine learning', 'deep learning', 'neural network', 'AI', 'artificial intelligence'],
     'control_systems': ['control system', 'controller', 'control strategy', 'model predictive control', 'MPC'],
     'optimization': ['optimization', 'optimal', 'scheduling', 'dispatch'],
     'smart_grid': ['smart grid', 'demand response', 'demand side management', 'DSM'],
@@ -203,8 +202,16 @@ def extract_domain(author_data):
     for domain, keywords in DOMAIN_KEYWORDS.items():
         score = 0
         for keyword in keywords:
-            # Count occurrences of this keyword
-            count = combined_text.count(keyword.lower())
+            # Use word boundaries for short keywords (3 chars or less) to avoid false positives
+            # e.g., "EV" should not match "develop", "whatever", "level"
+            if len(keyword) <= 3:
+                # Use regex with word boundaries for short keywords
+                pattern = r'\b' + re.escape(keyword.lower()) + r'\b'
+                matches = re.findall(pattern, combined_text, re.IGNORECASE)
+                count = len(matches)
+            else:
+                # Use substring matching for longer keywords (safer)
+                count = combined_text.count(keyword.lower())
             score += count
         
         if score > 0:

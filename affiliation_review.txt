@@ -1,0 +1,52 @@
+================================================================================
+DACH AFFILIATION CLEANING REVIEW REPORT
+================================================================================
+
+Total unique affiliations: 5
+High confidence: 0
+Needs review: 5
+
+================================================================================
+⚠️  FLAGGED FOR REVIEW (sorted by author count)
+================================================================================
+
+Authors affected: 1
+Original: Corporate Research, Robert Bosch GmbH, Renningen, Germany
+Cleaned:  Corporate Research, Robert Bosch GmbH, Renningen, Germany
+Email:    felix.berkel@bosch.com
+Status:   ❌ Error (Confidence: low)
+--------------------------------------------------------------------------------
+
+Authors affected: 1
+Original: Institute of Innovative Mobility, Technische Hochschule Ingolstadt, Ingolstadt, Germany
+Cleaned:  Institute of Innovative Mobility, Technische Hochschule Ingolstadt, Ingolstadt, Germany
+Email:    extern.Emanuel.Gebauer@thi.de
+Status:   ❌ Error (Confidence: low)
+--------------------------------------------------------------------------------
+
+Authors affected: 1
+Original: Technical University of Munich, Germany
+Cleaned:  Technical University of Munich, Germany
+Email:    wei.tian@tum.de
+Status:   ❌ Error (Confidence: low)
+--------------------------------------------------------------------------------
+
+Authors affected: 1
+Original: Institute for Electrical Machines, Traction and Drives, Technische Universität Braunschweig, Brunswick, Germany
+Cleaned:  Institute for Electrical Machines, Traction and Drives, Technische Universität Braunschweig, Brunswick, Germany
+Email:    marius.becker@tu-braunschweig.de
+Status:   ❌ Error (Confidence: low)
+--------------------------------------------------------------------------------
+
+Authors affected: 1
+Original: Forschungszentrum Jülich, Germany
+Cleaned:  Forschungszentrum Jülich, Germany
+Email:    a.xhonneux@fz-juelich.de
+Status:   ❌ Error (Confidence: low)
+--------------------------------------------------------------------------------
+
+
+================================================================================
+✅ HIGH CONFIDENCE CLEANINGS (Top 20 by author count)
+================================================================================
+
