@@ -2,47 +2,117 @@
 DACH AFFILIATION CLEANING REVIEW REPORT
 ================================================================================
 
-Total unique affiliations: 5
-High confidence: 0
-Needs review: 5
+Total unique affiliations: 521
+High confidence: 506
+Needs review: 15
 
 ================================================================================
 ⚠️  FLAGGED FOR REVIEW (sorted by author count)
 ================================================================================
 
 Authors affected: 1
-Original: Corporate Research, Robert Bosch GmbH, Renningen, Germany
-Cleaned:  Corporate Research, Robert Bosch GmbH, Renningen, Germany
-Email:    felix.berkel@bosch.com
-Status:   ❌ Error (Confidence: low)
+Original: Electronic Energy Systems, Fraunhofer ISIT, Itzehoe, Germany
+Cleaned:  Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
+Email:    dda@tf.uni-kiel.de
+Status:   ⚠️ Email suggests different org (Confidence: high)
 --------------------------------------------------------------------------------
 
 Authors affected: 1
-Original: Institute of Innovative Mobility, Technische Hochschule Ingolstadt, Ingolstadt, Germany
-Cleaned:  Institute of Innovative Mobility, Technische Hochschule Ingolstadt, Ingolstadt, Germany
-Email:    extern.Emanuel.Gebauer@thi.de
-Status:   ❌ Error (Confidence: low)
+Original: Institute of Transportation Systems, German Aerospace Center, Brunswick, Germany
+Cleaned:  Deutsches Zentrum für Luft- und Raumfahrt e.V.
+Email:    edmir.xhoxhi@ikt.uni-hannover.de
+Status:   ⚠️ Email suggests different org (Confidence: high)
 --------------------------------------------------------------------------------
 
 Authors affected: 1
-Original: Technical University of Munich, Germany
-Cleaned:  Technical University of Munich, Germany
-Email:    wei.tian@tum.de
-Status:   ❌ Error (Confidence: low)
+Original: BAVERTIS GmbH, Munich, Germany
+Cleaned:  BAVERTIS GmbH
+Email:    michael.hohenegger@unibw.de
+Status:   ⚠️ Email suggests different org (Confidence: high)
 --------------------------------------------------------------------------------
 
 Authors affected: 1
-Original: Institute for Electrical Machines, Traction and Drives, Technische Universität Braunschweig, Brunswick, Germany
-Cleaned:  Institute for Electrical Machines, Traction and Drives, Technische Universität Braunschweig, Brunswick, Germany
-Email:    marius.becker@tu-braunschweig.de
-Status:   ❌ Error (Confidence: low)
+Original: SIEMENS, Erlangen, Germany
+Cleaned:  Siemens AG
+Email:    sebastian.nielebock@ovgu.de
+Status:   ⚠️ Email suggests different org (Confidence: high)
 --------------------------------------------------------------------------------
 
 Authors affected: 1
-Original: Forschungszentrum Jülich, Germany
-Cleaned:  Forschungszentrum Jülich, Germany
-Email:    a.xhonneux@fz-juelich.de
-Status:   ❌ Error (Confidence: low)
+Original: Fusion for Energy, Garching, Germany
+Cleaned:  Fusion for Energy
+Email:    giampaolo.frello@f4e.europa.eu
+Status:   ⚠️ Email suggests different org (Confidence: medium)
+--------------------------------------------------------------------------------
+
+Authors affected: 1
+Original: SIEMENS AG, Erlangen, Germany
+Cleaned:  Siemens AG
+Email:    kucka@lea.uni-paderborn.de
+Status:   ⚠️ Email suggests different org (Confidence: high)
+--------------------------------------------------------------------------------
+
+Authors affected: 1
+Original: Universität der Bundeswehr München, Neubiberg, Germany
+Cleaned:  Universität der Bundeswehr München
+Email:    Christian.Hanzl@thi.de
+Status:   ⚠️ Email suggests different org (Confidence: high)
+--------------------------------------------------------------------------------
+
+Authors affected: 1
+Original: Universität der Bundeswehr München, Neubiberg, Germany
+Cleaned:  Universität der Bundeswehr München
+Email:    Julia.Stoettner@thi.de
+Status:   ⚠️ Email suggests different org (Confidence: high)
+--------------------------------------------------------------------------------
+
+Authors affected: 1
+Original: Fraunhofer IMS, Duisburg, Germany
+Cleaned:  Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
+Email:    anton.grabmaier@uni-due.de
+Status:   ⚠️ Email domain mismatch (Confidence: high)
+--------------------------------------------------------------------------------
+
+Authors affected: 1
+Original: Yazaki Systems Technologies GmbH, Regensburg, Germany
+Cleaned:  Yazaki Systems Technologies GmbH
+Email:    Rok.Tavcar@fe.uni-lj.si
+Status:   ⚠️ Email domain mismatch - fe.uni-lj.si suggests University of Ljubljana, not Yazaki (Confidence: high)
+--------------------------------------------------------------------------------
+
+Authors affected: 1
+Original: Analog Devices Inc., Germany
+Cleaned:  Analog Devices GmbH
+Email:    naci.pekcokguler@boun.edu.tr
+Status:   ⚠️ Email suggests different org (Confidence: high)
+--------------------------------------------------------------------------------
+
+Authors affected: 1
+Original: Infineon Technologies AG, Villach, Austria
+Cleaned:  Infineon Technologies Austria AG
+Email:    azurza@lem.ee.ethz.ch
+Status:   ⚠️ Email suggests different org (Confidence: high)
+--------------------------------------------------------------------------------
+
+Authors affected: 1
+Original: Infineon Technologies Austria AG, Villach, Austria
+Cleaned:  Infineon Technologies Austria AG
+Email:    azurza@lem.ee.ethz.ch
+Status:   ⚠️ Email suggests different org (Confidence: high)
+--------------------------------------------------------------------------------
+
+Authors affected: 1
+Original: Department of Information Technology, University of Applied Sciences Burgenland, Eisenstadt, Austria
+Cleaned:  Technische Universität Wien
+Email:    gernot.steindl@tuwien.ac.at
+Status:   ⚠️ Email suggests different org (Confidence: high)
+--------------------------------------------------------------------------------
+
+Authors affected: 1
+Original: École Polytechnique Fédérale de Lausanne, Lausanne, Switzerland
+Cleaned:  École Polytechnique Fédérale de Lausanne, Lausanne, Switzerland
+Email:    luca.furieri@epfl.ch
+Status:   ❌ Parse error (Confidence: low)
 --------------------------------------------------------------------------------
 
 
@@ -50,3 +120,23 @@ Status:   ❌ Error (Confidence: low)
 ✅ HIGH CONFIDENCE CLEANINGS (Top 20 by author count)
 ================================================================================
 
+Authors:   1 | Corporate Research, Robert Bosch GmbH, Renningen, Germany    → Robert Bosch GmbH
+Authors:   1 | Institute of Innovative Mobility, Technische Hochschule Ingo → Technische Hochschule Ingolstadt
+Authors:   1 | Technical University of Munich, Germany                      → Technische Universität München
+Authors:   1 | Institute for Electrical Machines, Traction and Drives, Tech → Technische Universität Braunschweig
+Authors:   1 | Forschungszentrum Jülich, Germany                            → Forschungszentrum Jülich GmbH
+Authors:   1 | IAEW, RWTH Aachen University, Aachen, Germany                → RWTH Aachen
+Authors:   1 | Computer Networks, Universität Hamburg, Hamburg, Germany     → Universität Hamburg
+Authors:   1 | Fraunhofer Institute for Physical Measurement Techniques IPM → Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
+Authors:   1 | Department of Mathematics, Technische Universität Berlin, Be → Technische Universität Berlin
+Authors:   1 | ForWind - Center for Wind Energy Research, Insitute of Physi → Carl von Ossietzky Universität Oldenburg
+Authors:   1 | Munich Institute of Robotics and Machine Intelligence (MIRMI → Technische Universität München
+Authors:   1 | Department of Engineering I, Control Engineering, HTW Berlin → Hochschule für Technik und Wirtschaft Berlin
+Authors:   1 | University of Münster, Germany                               → Universität Münster
+Authors:   1 | Chair of Power Electronics, Christian-Albrechts-University o → Christian-Albrechts-Universität zu Kiel
+Authors:   1 | BMW AG, Munich, Germany                                      → Bayerische Motoren Werke Aktiengesellschaft
+Authors:   1 | Energy Information Networks & Systems, Technical University  → Technische Universität Darmstadt
+Authors:   1 | German Aerospace Center (DLR), Weßling, Germany              → Deutsches Zentrum für Luft- und Raumfahrt e. V.
+Authors:   1 | Institute for Electrical Machines, Traction and Drives, Tech → Technische Universität Braunschweig
+Authors:   1 | Institute of Automotive Technology, Department of Mechanical → Technische Universität München
+Authors:   1 | Cluster of Excellence SE2A - Sustainable and Energy-Efficien → Technische Universität Braunschweig

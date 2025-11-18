@@ -150,7 +150,7 @@ Provide ONLY the JSON, no other text."""
         }
         
         payload = {
-            "model": "llama-3.1-sonar-small-128k-online",
+            "model": "sonar-pro",
             "messages": [
                 {
                     "role": "system",
@@ -221,23 +221,74 @@ def extract_unique_affiliations(input_file: str) -> list:
             affiliation = row.get('primary_affiliation', '').strip()
             email = row.get('email', '').strip()
             
+            # Parse all_affiliations to check secondary affiliations for email validation
+            all_affiliations_str = row.get('all_affiliations', '[]').strip()
+            try:
+                all_affiliations = json.loads(all_affiliations_str) if all_affiliations_str else []
+            except:
+                all_affiliations = [affiliation] if affiliation else []
+            
             # Store for each author
             author_affiliations.append({
                 'author_id': author_id,
                 'affiliation': affiliation,
-                'email': email
+                'email': email,
+                'all_affiliations': all_affiliations
             })
             
-            # Track unique combinations
+            # Track unique combinations (keyed by primary affiliation and email)
+            # but store all_affiliations for validation
             key = (affiliation, email)
             if key not in affiliation_map:
-                affiliation_map[key] = []
-            affiliation_map[key].append(author_id)
+                affiliation_map[key] = {
+                    'author_ids': [],
+                    'all_affiliations': []
+                }
+            affiliation_map[key]['author_ids'].append(author_id)
+            # Collect all secondary affiliations for this combination
+            affiliation_map[key]['all_affiliations'].extend(all_affiliations)
     
     logger.info(f"Found {len(author_affiliations)} authors")
     logger.info(f"Found {len(affiliation_map)} unique affiliation+email combinations")
     
     return author_affiliations, affiliation_map
+
+
+def revalidate_against_all_affiliations(result: dict, primary_affiliation: str, 
+                                       all_affiliations: list, email: str) -> dict:
+    """
+    Re-validate email against all affiliations (not just primary).
+    This reduces false positives for authors with multiple affiliations.
+    """
+    # If already validated as a match, keep it
+    if '✅' in result.get('validation_status', ''):
+        return result
+    
+    # Extract email domain
+    if not email or '@' not in email:
+        return result
+    
+    email_domain = email.split('@')[-1].lower()
+    
+    # Check if email matches any of the all_affiliations
+    for affiliation in all_affiliations:
+        affiliation_lower = affiliation.lower()
+        
+        # Simple heuristic matching
+        # Check for university/institution matches
+        email_parts = email_domain.replace('.', ' ').replace('-', ' ').split()
+        
+        for part in email_parts:
+            if len(part) > 3 and part in affiliation_lower:
+                # Found a match in secondary affiliation!
+                result['validation_status'] = f"✅ Match (via secondary affiliation)"
+                result['confidence'] = 'high'
+                if 'reasoning' in result:
+                    result['reasoning'] += f" Note: Email matches secondary affiliation: {affiliation[:80]}"
+                return result
+    
+    # No match found in any affiliation
+    return result
 
 
 def process_affiliations(cleaner: AffiliationCleaner, affiliation_map: dict, delay: float = 2.0) -> dict:
@@ -247,10 +298,18 @@ def process_affiliations(cleaner: AffiliationCleaner, affiliation_map: dict, del
     results = {}
     total = len(affiliation_map)
     
-    for idx, ((affiliation, email), author_ids) in enumerate(affiliation_map.items(), 1):
+    for idx, ((affiliation, email), data) in enumerate(affiliation_map.items(), 1):
+        author_ids = data['author_ids']
+        all_affiliations = data['all_affiliations']
+        
         logger.info(f"[{idx}/{total}] Processing: {affiliation[:60]}... (Email: {email})")
         
         result = cleaner.clean_affiliation(affiliation, email)
+        
+        # Re-validate against all affiliations (not just primary)
+        result = revalidate_against_all_affiliations(
+            result, affiliation, all_affiliations, email
+        )
         
         # Store result for this affiliation+email combo
         key = (affiliation, email)
@@ -317,7 +376,8 @@ def generate_review_report(cleaned_results: dict, affiliation_map: dict, output_
     high_confidence = []
     
     for (affiliation, email), result in cleaned_results.items():
-        author_ids = affiliation_map.get((affiliation, email), [])
+        data = affiliation_map.get((affiliation, email), {})
+        author_ids = data.get('author_ids', [])
         author_count = len(author_ids)
         
         item = {

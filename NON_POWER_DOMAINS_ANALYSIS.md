@@ -410,3 +410,4 @@ The 1,961 "non-power electronics" authors represent a **diverse, high-quality su
 
 *Analysis performed on 1,961 authors from `non_dach_without_power_terms.csv` (1,498) and `dach_without_power_terms.csv` (463)*
 
+
